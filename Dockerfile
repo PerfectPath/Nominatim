@@ -35,6 +35,7 @@ RUN apt-get update && apt-get install -y \
     git \
     wget \
     osmium-tool \
+    osm2pgsql \
     && rm -rf /var/lib/apt/lists/*
 
 # Configurar directorios
@@ -44,14 +45,12 @@ RUN mkdir -p /app/data
 # Descargar archivo OSM de Chile
 RUN wget -q https://download.geofabrik.de/south-america/chile-latest.osm.pbf -O /app/data/chile-latest.osm.pbf
 
-# Clonar el código fuente de Nominatim (versión específica)
-RUN git clone --recursive https://github.com/osm-search/Nominatim.git /app/Nominatim && \
-    cd /app/Nominatim && \
-    git checkout v4.0.0
+# Copiar los archivos del repositorio local
+COPY . /app/Nominatim/
 
 # Compilar e instalar Nominatim
 WORKDIR /app/Nominatim
-RUN mkdir build && cd build && \
+RUN mkdir -p build && cd build && \
     cmake -DCMAKE_BUILD_TYPE=Release .. && \
     make -j$(nproc) VERBOSE=1 && \
     make install
