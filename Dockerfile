@@ -3,6 +3,9 @@ FROM mediagis/nominatim:4.0
 # Evitar interacciones durante la instalación de paquetes
 ENV DEBIAN_FRONTEND=noninteractive
 
+# Instalar wget
+RUN apt-get update && apt-get install -y wget && rm -rf /var/lib/apt/lists/*
+
 # Configurar directorios
 WORKDIR /app
 RUN mkdir -p /app/data
