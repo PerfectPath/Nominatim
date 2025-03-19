@@ -1,0 +1,225 @@
+{
+  "info": {
+    "name": "Nominatim API",
+    "description": "Colección de endpoints para la API de Nominatim",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Search",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "{{base_url}}/search?q=Santiago, Chile&format=json",
+          "host": ["{{base_url}}"],
+          "path": ["search"],
+          "query": [
+            {
+              "key": "q",
+              "value": "Santiago, Chile",
+              "description": "Consulta de búsqueda (dirección, lugar, etc.)"
+            },
+            {
+              "key": "format",
+              "value": "json",
+              "description": "Formato de respuesta (json, xml, etc.)"
+            },
+            {
+              "key": "limit",
+              "value": "10",
+              "description": "Número máximo de resultados",
+              "disabled": true
+            },
+            {
+              "key": "countrycodes",
+              "value": "cl",
+              "description": "Códigos de país para filtrar resultados",
+              "disabled": true
+            },
+            {
+              "key": "addressdetails",
+              "value": "1",
+              "description": "Incluir detalles de dirección en la respuesta",
+              "disabled": true
+            },
+            {
+              "key": "extratags",
+              "value": "1",
+              "description": "Incluir etiquetas adicionales en la respuesta",
+              "disabled": true
+            },
+            {
+              "key": "namedetails",
+              "value": "1",
+              "description": "Incluir detalles de nombre en la respuesta",
+              "disabled": true
+            }
+          ]
+        },
+        "description": "Buscar lugares por nombre o dirección"
+      },
+      "response": []
+    },
+    {
+      "name": "Reverse Geocoding",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "{{base_url}}/reverse?lat=-33.4489&lon=-70.6693&format=json",
+          "host": ["{{base_url}}"],
+          "path": ["reverse"],
+          "query": [
+            {
+              "key": "lat",
+              "value": "-33.4489",
+              "description": "Latitud"
+            },
+            {
+              "key": "lon",
+              "value": "-70.6693",
+              "description": "Longitud"
+            },
+            {
+              "key": "format",
+              "value": "json",
+              "description": "Formato de respuesta (json, xml, etc.)"
+            },
+            {
+              "key": "zoom",
+              "value": "18",
+              "description": "Nivel de zoom (0-18)",
+              "disabled": true
+            },
+            {
+              "key": "addressdetails",
+              "value": "1",
+              "description": "Incluir detalles de dirección en la respuesta",
+              "disabled": true
+            },
+            {
+              "key": "extratags",
+              "value": "1",
+              "description": "Incluir etiquetas adicionales en la respuesta",
+              "disabled": true
+            },
+            {
+              "key": "namedetails",
+              "value": "1",
+              "description": "Incluir detalles de nombre en la respuesta",
+              "disabled": true
+            }
+          ]
+        },
+        "description": "Obtener dirección a partir de coordenadas"
+      },
+      "response": []
+    },
+    {
+      "name": "Lookup",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "{{base_url}}/lookup?osm_ids=R12345&format=json",
+          "host": ["{{base_url}}"],
+          "path": ["lookup"],
+          "query": [
+            {
+              "key": "osm_ids",
+              "value": "R12345",
+              "description": "IDs de OSM (formato: [N|W|R]<id>)"
+            },
+            {
+              "key": "format",
+              "value": "json",
+              "description": "Formato de respuesta (json, xml, etc.)"
+            },
+            {
+              "key": "addressdetails",
+              "value": "1",
+              "description": "Incluir detalles de dirección en la respuesta",
+              "disabled": true
+            },
+            {
+              "key": "extratags",
+              "value": "1",
+              "description": "Incluir etiquetas adicionales en la respuesta",
+              "disabled": true
+            },
+            {
+              "key": "namedetails",
+              "value": "1",
+              "description": "Incluir detalles de nombre en la respuesta",
+              "disabled": true
+            }
+          ]
+        },
+        "description": "Buscar detalles de un lugar por su ID de OSM"
+      },
+      "response": []
+    },
+    {
+      "name": "Status",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "{{base_url}}/status",
+          "host": ["{{base_url}}"],
+          "path": ["status"]
+        },
+        "description": "Verificar el estado del servicio Nominatim"
+      },
+      "response": []
+    },
+    {
+      "name": "Details",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "{{base_url}}/details?place_id=12345&format=json",
+          "host": ["{{base_url}}"],
+          "path": ["details"],
+          "query": [
+            {
+              "key": "place_id",
+              "value": "12345",
+              "description": "ID del lugar"
+            },
+            {
+              "key": "format",
+              "value": "json",
+              "description": "Formato de respuesta (json, xml, etc.)"
+            },
+            {
+              "key": "addressdetails",
+              "value": "1",
+              "description": "Incluir detalles de dirección en la respuesta",
+              "disabled": true
+            },
+            {
+              "key": "extratags",
+              "value": "1",
+              "description": "Incluir etiquetas adicionales en la respuesta",
+              "disabled": true
+            },
+            {
+              "key": "namedetails",
+              "value": "1",
+              "description": "Incluir detalles de nombre en la respuesta",
+              "disabled": true
+            }
+          ]
+        },
+        "description": "Obtener detalles de un lugar por su ID"
+      },
+      "response": []
+    }
+  ],
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:8080",
+      "type": "string",
+      "description": "URL base de la API Nominatim"
+    }
+  ]
+}

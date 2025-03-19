@@ -1,0 +1,47 @@
+version: '3.8'
+
+services:
+  nominatim-api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: nominatim-api
+    ports:
+      - "8080:8080"
+    environment:
+      - NOMINATIM_DATABASE_DSN=pgsql:dbname=nominatim;host=nominatim-db;user=nominatim;password=nominatim
+      - NOMINATIM_OSM_FILE=/app/data/chile-latest.osm.pbf
+    volumes:
+      - nominatim-data:/app/data
+    depends_on:
+      - nominatim-db
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/status"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+  nominatim-db:
+    image: postgis/postgis:14-3.2
+    container_name: nominatim-db
+    environment:
+      - POSTGRES_USER=nominatim
+      - POSTGRES_PASSWORD=nominatim
+      - POSTGRES_DB=nominatim
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U nominatim"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+volumes:
+  nominatim-data:
+    driver: local
+  postgres-data:
+    driver: local
