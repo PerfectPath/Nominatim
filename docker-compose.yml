@@ -16,6 +16,7 @@ services:
       - NOMINATIM_DATABASE=nominatim
     volumes:
       - nominatim-data:/app/data
+      - ./data:/app/data
     depends_on:
       - nominatim-db
     restart: unless-stopped

@@ -1,77 +1,46 @@
-[![Build Status](https://github.com/osm-search/Nominatim/workflows/CI%20Tests/badge.svg)](https://github.com/osm-search/Nominatim/actions?query=workflow%3A%22CI+Tests%22)
+# Nominatim Deployment
 
-Nominatim
-=========
+This directory contains the necessary files to deploy a Nominatim geocoding service.
 
-Nominatim (from the Latin, 'by name') is a tool to search OpenStreetMap data
-by name and address (geocoding) and to generate synthetic addresses of
-OSM points (reverse geocoding). An instance with up-to-date data can be found
-at https://nominatim.openstreetmap.org. Nominatim is also used as one of the
-sources for the Search box on the OpenStreetMap home page.
+## Files
 
-Documentation
-=============
+- `Dockerfile`: Builds the Nominatim container with the required dependencies and data files
+- `docker-compose.yml`: Configuration for local development and testing
+- `railway.json`: Configuration for Railway deployment
+- `settings/local.php`: Custom settings for Nominatim
+- `data/`: Directory containing required data files
 
-The documentation of the latest development version is in the
-`docs/` subdirectory. A HTML version can be found at
-https://nominatim.org/release-docs/develop/ .
+## Required Data Files
 
-Installation
-============
+Nominatim requires specific data files to function properly:
 
-The latest stable release can be downloaded from https://nominatim.org.
-There you can also find [installation instructions for the release](https://nominatim.org/release-docs/latest/admin/Installation), as well as an extensive [Troubleshooting/FAQ section](https://nominatim.org/release-docs/latest/admin/Faq/).
+1. **OSM Data**: The Dockerfile is configured to download Chile's OSM data automatically
+2. **Country Grid**: The Dockerfile downloads the required `country_osm_grid.sql.gz` file from nominatim.org
 
-[Detailed installation instructions for current master](https://nominatim.org/release-docs/develop/admin/Installation)
-can be found at nominatim.org as well.
+## Deploying to Railway
 
-A quick summary of the necessary steps:
+When deploying to Railway, make sure:
 
-1. Create a Python virtualenv and install the packages:
+1. The service is configured to use port 8080 (specified in `railway.json`)
+2. The PostgreSQL database is properly configured and accessible
+3. The required data files are downloaded during the build process
 
-        python3 -m venv nominatim-venv
-        ./nominatim-venv/bin/pip install packaging/nominatim-{api,db}
+## Troubleshooting
 
-2. Create a project directory, get OSM data and import:
+### 502 Bad Gateway Error
 
-        mkdir nominatim-project
-        cd nominatim-project
-        ../nominatim-venv/bin/nominatim import --osm-file <your planet file>
+If you encounter a 502 Bad Gateway error when calling the `/search` endpoint, check:
 
-3. Start the webserver:
+1. Railway is using the correct port (8080) for the Nominatim API service, not the database port (5432)
+2. The `country_osm_grid.sql.gz` file is properly downloaded and available to the service
+3. The database connection is properly configured
 
-        ./nominatim-venv/bin/pip install uvicorn falcon
-        ../nominatim-venv/bin/nominatim serve
+### Checking Logs
 
+To diagnose issues, check the Railway logs for the service:
 
-License
-=======
+```
+railway logs
+```
 
-The Python source code is available under a GPL license version 3 or later.
-The Lua configuration files for osm2pgsql are released under the
-Apache License, Version 2.0. All other files are under a GPLv2 license.
-
-
-Contributing
-============
-
-Contributions, bug reports and pull requests are welcome. When reporting a
-bug, please use one of the
-[issue templates](https://github.com/osm-search/Nominatim/issues/new/choose)
-and make sure to provide all the information requested. If you are not
-sure if you have really found a bug, please ask for help in the forums
-first (see 'Questions' below).
-
-For details on contributing, have a look at the
-[contribution guide](CONTRIBUTING.md).
-
-
-Questions and help
-==================
-
-If you have questions about search results and the OpenStreetMap data
-used in the search, use the [OSM Forum](https://community.openstreetmap.org/).
-
-For questions, community help and discussions around the software and
-your own installation of Nominatim, use the
-[Github discussions forum](https://github.com/osm-search/Nominatim/discussions).
+Look for any errors related to missing files or database connection issues.

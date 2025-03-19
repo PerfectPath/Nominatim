@@ -12,6 +12,9 @@ WORKDIR /app
 # Descargar archivo OSM de Chile directamente a la ubicación esperada por el script de inicio
 RUN wget -q https://download.geofabrik.de/south-america/chile-latest.osm.pbf -O /nominatim/data.osm.pbf
 
+# Descargar el archivo country_grid necesario para la funcionalidad de búsqueda
+RUN mkdir -p /app/data && wget -q https://nominatim.org/data/country_grid.sql.gz -O /app/data/country_osm_grid.sql.gz
+
 # Configurar variables de entorno para Nominatim
 ENV PBF_PATH=/nominatim/data.osm.pbf
 ENV REPLICATION_URL=https://download.geofabrik.de/south-america/chile-updates/
