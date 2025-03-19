@@ -10,7 +10,10 @@ services:
       - "8080:8080"
     environment:
       - NOMINATIM_DATABASE_DSN=pgsql:dbname=nominatim;host=nominatim-db;user=nominatim;password=nominatim
-      - NOMINATIM_OSM_FILE=/app/data/chile-latest.osm.pbf
+      - PBF_URL=/app/data/chile-latest.osm.pbf
+      - REPLICATION_URL=https://download.geofabrik.de/south-america/chile-updates/
+      - NOMINATIM_PASSWORD=nominatim
+      - NOMINATIM_DATABASE=nominatim
     volumes:
       - nominatim-data:/app/data
     depends_on:
