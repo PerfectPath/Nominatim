@@ -11,6 +11,7 @@ RUN apt-get update && apt-get install -y \
     libboost-dev \
     libboost-system-dev \
     libboost-filesystem-dev \
+    libboost-program-options-dev \
     libexpat1-dev \
     zlib1g-dev \
     libbz2-dev \
@@ -23,6 +24,10 @@ RUN apt-get update && apt-get install -y \
     php \
     php-pgsql \
     php-intl \
+    php-cli \
+    php-curl \
+    php-mbstring \
+    php-xml \
     python3-dev \
     python3-pip \
     python3-psycopg2 \
@@ -42,13 +47,13 @@ RUN wget -q https://download.geofabrik.de/south-america/chile-latest.osm.pbf -O 
 # Clonar el código fuente de Nominatim (versión específica)
 RUN git clone --recursive https://github.com/osm-search/Nominatim.git /app/Nominatim && \
     cd /app/Nominatim && \
-    git checkout v4.2.3
+    git checkout v4.0.0
 
 # Compilar e instalar Nominatim
 WORKDIR /app/Nominatim
 RUN mkdir build && cd build && \
-    cmake .. && \
-    make -j$(nproc) && \
+    cmake -DCMAKE_BUILD_TYPE=Release .. && \
+    make -j$(nproc) VERBOSE=1 && \
     make install
 
 # Configurar Nominatim
