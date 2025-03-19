@@ -13,7 +13,7 @@ WORKDIR /app
 RUN wget -q https://download.geofabrik.de/south-america/chile-latest.osm.pbf -O /nominatim/data.osm.pbf
 
 # Configurar variables de entorno para Nominatim
-ENV PBF_URL=""
+ENV PBF_PATH=/nominatim/data.osm.pbf
 ENV REPLICATION_URL=https://download.geofabrik.de/south-america/chile-updates/
 ENV NOMINATIM_PASSWORD=password123
 ENV NOMINATIM_DATABASE=nominatim
