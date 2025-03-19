@@ -39,8 +39,10 @@ RUN mkdir -p /app/data
 # Descargar archivo OSM de Chile
 RUN wget -q https://download.geofabrik.de/south-america/chile-latest.osm.pbf -O /app/data/chile-latest.osm.pbf
 
-# Clonar el código fuente de Nominatim
-RUN git clone --recursive https://github.com/osm-search/Nominatim.git /app/Nominatim
+# Clonar el código fuente de Nominatim (versión específica)
+RUN git clone --recursive https://github.com/osm-search/Nominatim.git /app/Nominatim && \
+    cd /app/Nominatim && \
+    git checkout v4.2.3
 
 # Compilar e instalar Nominatim
 WORKDIR /app/Nominatim
