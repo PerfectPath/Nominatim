@@ -18,7 +18,7 @@ RUN mkdir -p /app/data && wget -q https://nominatim.org/data/country_grid.sql.gz
 # Configurar variables de entorno para Nominatim
 ENV PBF_PATH=/nominatim/data.osm.pbf
 ENV REPLICATION_URL=https://download.geofabrik.de/south-america/chile-updates/
-ENV NOMINATIM_PASSWORD=password123
+ENV NOMINATIM_PASSWORD=nominatim
 ENV NOMINATIM_DATABASE=nominatim
 ENV NOMINATIM_DATABASE_DSN="pgsql:dbname=${NOMINATIM_DATABASE};user=nominatim;password=${NOMINATIM_PASSWORD}"
 
