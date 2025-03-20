@@ -2,7 +2,21 @@
 // Nominatim local settings
 
 // Database connection
-@define('CONST_Database_DSN', 'pgsql:host=nominatim-db;port=5432;dbname=nominatim;user=nominatim;password=nominatim');
+// Check if we're running in Railway environment
+if (getenv('DATABASE_URL') !== false) {
+    // Parse DATABASE_URL from Railway
+    $db_url = parse_url(getenv('DATABASE_URL'));
+    $db_host = $db_url['host'] ?? 'localhost';
+    $db_port = $db_url['port'] ?? '5432';
+    $db_name = ltrim($db_url['path'] ?? '/nominatim', '/');
+    $db_user = $db_url['user'] ?? 'nominatim';
+    $db_pass = $db_url['pass'] ?? 'nominatim';
+    
+    @define('CONST_Database_DSN', "pgsql:host=$db_host;port=$db_port;dbname=$db_name;user=$db_user;password=$db_pass");
+} else {
+    // Local development settings
+    @define('CONST_Database_DSN', 'pgsql:host=nominatim-db;port=5432;dbname=nominatim;user=nominatim;password=nominatim');
+}
 
 // Website settings
 @define('CONST_Website_BaseURL', '/');
