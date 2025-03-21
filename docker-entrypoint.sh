@@ -81,6 +81,18 @@ fi
 # Verificar permisos de Nominatim
 chown -R www-data:www-data /app/nominatim-project
 
+# Configurar PostgreSQL para usar md5 en lugar de peer
+if [ -f /etc/postgresql/12/main/conf.d/pg_hba_custom.conf ]; then
+    info "Aplicando configuración personalizada de PostgreSQL..."
+    # Asegurarse de que el archivo tiene los permisos correctos
+    chown postgres:postgres /etc/postgresql/12/main/conf.d/pg_hba_custom.conf
+    chmod 640 /etc/postgresql/12/main/conf.d/pg_hba_custom.conf
+    
+    # Reiniciar PostgreSQL para aplicar la configuración
+    service postgresql restart
+    success "Configuración de PostgreSQL aplicada correctamente"
+fi
+
 # Iniciar servicios
 info "Iniciando servicios..."
 exec "$@"
