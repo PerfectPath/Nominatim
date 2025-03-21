@@ -25,7 +25,7 @@ ENV NOMINATIM_DATABASE_DSN="pgsql:dbname=${NOMINATIM_DATABASE};user=nominatim;pa
 # Copiar archivos de configuración si existen
 COPY ./settings/local.php /app/nominatim-project/settings/local.php
 # Copiar configuración personalizada de PostgreSQL
-COPY ./pg_hba_custom.conf /etc/postgresql/12/main/conf.d/pg_hba_custom.conf
+COPY ./pg_hba_custom.conf /etc/postgresql/14/main/pg_hba.conf
 
 # Exponer puerto
 EXPOSE 8080
