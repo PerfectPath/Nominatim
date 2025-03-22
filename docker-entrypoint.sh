@@ -43,17 +43,17 @@ else
 fi
 
 # Verificar si PostgreSQL está inicializado
-if [ ! -d /var/lib/postgresql/14/main ]; then
+if [ ! -d /var/lib/postgresql/12/main ]; then
     info "Inicializando PostgreSQL..."
-    mkdir -p /var/lib/postgresql/14/main
-    chown -R postgres:postgres /var/lib/postgresql/14/main
-    su - postgres -c "/usr/lib/postgresql/14/bin/initdb -D /var/lib/postgresql/14/main"
+    mkdir -p /var/lib/postgresql/12/main
+    chown -R postgres:postgres /var/lib/postgresql/12/main
+    su - postgres -c "/usr/lib/postgresql/12/bin/initdb -D /var/lib/postgresql/12/main"
     success "PostgreSQL inicializado correctamente"
 fi
 
 # Verificar permisos de PostgreSQL
-chown -R postgres:postgres /var/lib/postgresql/14/main
-chmod 700 /var/lib/postgresql/14/main
+chown -R postgres:postgres /var/lib/postgresql/12/main
+chmod 700 /var/lib/postgresql/12/main
 
 # Verificar si la base de datos Nominatim existe
 su - postgres -c "pg_isready" || true
@@ -81,12 +81,44 @@ fi
 # Verificar permisos de Nominatim
 chown -R www-data:www-data /app/nominatim-project
 
-# Asegurarse de que el archivo pg_hba.conf tiene los permisos correctos
-if [ -f /etc/postgresql/14/main/pg_hba.conf ]; then
-    info "Configurando permisos para pg_hba.conf..."
-    chown postgres:postgres /etc/postgresql/14/main/pg_hba.conf
-    chmod 640 /etc/postgresql/14/main/pg_hba.conf
-    success "Permisos configurados correctamente"
+# Configurar PostgreSQL para usar trust en lugar de peer
+info "Configurando PostgreSQL para usar autenticación trust..."
+
+# Verificar si el archivo pg_hba_custom.conf existe
+if [ -f /nominatim/pg_hba_custom.conf ]; then
+    info "Copiando archivo pg_hba_custom.conf a PostgreSQL..."
+    cp /nominatim/pg_hba_custom.conf /etc/postgresql/12/main/pg_hba.conf
+    chown postgres:postgres /etc/postgresql/12/main/pg_hba.conf
+    chmod 640 /etc/postgresql/12/main/pg_hba.conf
+    
+    # Reiniciar PostgreSQL para aplicar la configuración
+    info "Reiniciando PostgreSQL para aplicar la configuración..."
+    service postgresql restart
+    success "PostgreSQL configurado correctamente"
+else
+    warning "Archivo pg_hba_custom.conf no encontrado, usando configuración predeterminada"
+    
+    # Crear archivo pg_hba.conf directamente
+    cat > /etc/postgresql/12/main/pg_hba.conf << EOF
+# PostgreSQL Client Authentication Configuration File
+# TYPE  DATABASE        USER            ADDRESS                 METHOD
+
+# "local" is for Unix domain socket connections only
+local   all             all                                     trust
+
+# IPv4 local connections:
+host    all             all             127.0.0.1/32            md5
+
+# IPv6 local connections:
+host    all             all             ::1/128                 md5
+EOF
+    chown postgres:postgres /etc/postgresql/12/main/pg_hba.conf
+    chmod 640 /etc/postgresql/12/main/pg_hba.conf
+    
+    # Reiniciar PostgreSQL para aplicar la configuración
+    info "Reiniciando PostgreSQL para aplicar la configuración..."
+    service postgresql restart
+    success "PostgreSQL configurado correctamente"
 fi
 
 # Iniciar servicios
