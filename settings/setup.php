@@ -22,6 +22,3 @@
 // Logging
 @define('CONST_Log_DB', true);
 @define('CONST_Log_File', '/app/nominatim-project/nominatim.log');
-
-// Allow database creation during import
-@define('CONST_Skip_Database_Creation', true);

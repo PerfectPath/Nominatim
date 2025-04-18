@@ -23,13 +23,9 @@ if [ ! -f /var/lib/postgresql/12/main/import-finished ]; then
     chown -R nominatim:nominatim /app
     
     echo "Importing OSM data..."
-    # Initialize database structure first
+    # Import the data directly (nominatim will create the schema)
     su - nominatim -c "source ~/.bashrc && \
-        nominatim admin --init-database --project-dir /app/nominatim-project"
-
-    # Then import the data
-    su - nominatim -c "source ~/.bashrc && \
-        nominatim import --osm-file $PBF_PATH --project-dir /app/nominatim-project --no-drop && \
+        nominatim import --osm-file $PBF_PATH --project-dir /app/nominatim-project && \
         nominatim index --project-dir /app/nominatim-project && \
         nominatim refresh --project-dir /app/nominatim-project"
     
