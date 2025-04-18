@@ -5,8 +5,15 @@ ENV DEBIAN_FRONTEND=noninteractive
 
 # Instalar herramientas necesarias
 RUN apt-get update && \
-    apt-get install -y wget postgresql-client sudo postgresql-12-postgis-3 postgresql-12-postgis-3-scripts && \
-    rm -rf /var/lib/apt/lists/* && \
+    apt-get install -y \
+    wget \
+    postgresql-client \
+    sudo \
+    postgresql-12-postgis-3 \
+    postgresql-12-postgis-3-scripts \
+    osm2pgsql \
+    osmium-tool \
+    && rm -rf /var/lib/apt/lists/* && \
     # Crear usuario y grupo nominatim
     addgroup --system nominatim && \
     adduser --system --ingroup nominatim --home /home/nominatim --shell /bin/bash nominatim && \
@@ -25,6 +32,8 @@ RUN chmod +x /docker-entrypoint-initdb.d/init-db.sh
 
 # Configurar directorios
 WORKDIR /app
+RUN mkdir -p /app/nominatim-project && \
+    chown -R nominatim:nominatim /app/nominatim-project
 
 # Descargar archivo OSM de Chile directamente a la ubicación esperada por el script de inicio
 RUN wget -q https://download.geofabrik.de/south-america/chile-latest.osm.pbf -O /nominatim/data.osm.pbf
@@ -47,10 +56,12 @@ RUN echo '#!/bin/bash' > /app/wait-for-postgres.sh && \
     echo '/docker-entrypoint-initdb.d/init-db.sh' >> /app/wait-for-postgres.sh && \
     chmod +x /app/wait-for-postgres.sh
 
-# Copiar archivos de configuración si existen
-COPY ./settings/local.php /app/nominatim-project/settings/local.php
-# Copiar configuración personalizada de PostgreSQL
+# Copiar y configurar archivos de configuración
+RUN mkdir -p /app/nominatim-project/settings
+COPY ./settings/settings.php /app/nominatim-project/settings/settings.php
 COPY ./pg_hba_custom.conf /nominatim/pg_hba_custom.conf
+RUN chown -R nominatim:nominatim /app/nominatim-project/settings && \
+    chmod 644 /app/nominatim-project/settings/settings.php
 
 # Exponer puerto
 EXPOSE 8080
