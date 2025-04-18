@@ -24,7 +24,7 @@ if [ ! -f /var/lib/postgresql/12/main/import-finished ]; then
     
     echo "Importing OSM data..."
     # Run import as nominatim user with proper environment
-    su - nominatim -c "source ~/.bashrc && nominatim import --osm-file $PBF_PATH"
+    su - nominatim -c "source ~/.bashrc && nominatim import --osm-file $PBF_PATH --no-create-db"
     
     touch /var/lib/postgresql/12/main/import-finished
     echo "OSM data import completed"

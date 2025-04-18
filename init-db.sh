@@ -15,8 +15,12 @@ sudo -u postgres psql -c "GRANT nominatim TO \"www-data\";"
 sudo -u postgres psql -c "DROP DATABASE IF EXISTS nominatim;"
 sudo -u postgres createdb -O nominatim nominatim
 
-# Grant permissions on the nominatim database
+# Grant permissions and initialize schema
 sudo -u postgres psql -d nominatim -c "GRANT ALL PRIVILEGES ON DATABASE nominatim TO nominatim;"
 sudo -u postgres psql -d nominatim -c "GRANT CONNECT ON DATABASE nominatim TO \"www-data\";"
+sudo -u postgres psql -d nominatim -c "CREATE EXTENSION IF NOT EXISTS postgis;"
+sudo -u postgres psql -d nominatim -c "CREATE EXTENSION IF NOT EXISTS hstore;"
+sudo -u postgres psql -d nominatim -c "ALTER DATABASE nominatim SET postgis.enable_outdb_rasters TO True;"
+sudo -u postgres psql -d nominatim -c "ALTER DATABASE nominatim SET postgis.gdal_enabled_drivers TO 'ENABLE_ALL';"
 sudo -u postgres psql -d nominatim -c "GRANT USAGE ON SCHEMA public TO \"www-data\";"
 sudo -u postgres psql -d nominatim -c "ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT SELECT ON TABLES TO \"www-data\";"

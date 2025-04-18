@@ -5,7 +5,7 @@ ENV DEBIAN_FRONTEND=noninteractive
 
 # Instalar herramientas necesarias
 RUN apt-get update && \
-    apt-get install -y wget postgresql-client sudo && \
+    apt-get install -y wget postgresql-client sudo postgresql-12-postgis-3 postgresql-12-postgis-3-scripts && \
     rm -rf /var/lib/apt/lists/* && \
     # Crear usuario y grupo nominatim
     addgroup --system nominatim && \
