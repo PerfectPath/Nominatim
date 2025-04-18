@@ -57,11 +57,15 @@ RUN echo '#!/bin/bash' > /app/wait-for-postgres.sh && \
     chmod +x /app/wait-for-postgres.sh
 
 # Copiar y configurar archivos de configuración
-RUN mkdir -p /app/nominatim-project/settings
-COPY ./settings/settings.php /app/nominatim-project/settings/settings.php
+RUN mkdir -p /app/nominatim-project/settings /app/nominatim-project/module
+COPY ./settings/setup.php /app/nominatim-project/settings/setup.php
 COPY ./pg_hba_custom.conf /nominatim/pg_hba_custom.conf
-RUN chown -R nominatim:nominatim /app/nominatim-project/settings && \
-    chmod 644 /app/nominatim-project/settings/settings.php
+RUN chown -R nominatim:nominatim /app/nominatim-project && \
+    chmod 644 /app/nominatim-project/settings/setup.php && \
+    chmod 755 /app/nominatim-project/module && \
+    touch /app/nominatim-project/nominatim.log && \
+    chown nominatim:nominatim /app/nominatim-project/nominatim.log && \
+    chmod 664 /app/nominatim-project/nominatim.log
 
 # Exponer puerto
 EXPOSE 8080
