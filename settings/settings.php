@@ -1,6 +1,10 @@
+
 <?php
 // Database connection settings
 @define('CONST_Database_DSN', 'pgsql:host=localhost;port=5432;dbname=nominatim;user=nominatim;password=nominatim');
+@define('CONST_Database_Web_User', 'www-data');
+@define('CONST_Database_Web_Password', 'nominatim');
+@define('CONST_Database_Schema', 'nominatim');
 
 // Website settings
 @define('CONST_Website_BaseURL', '/');
