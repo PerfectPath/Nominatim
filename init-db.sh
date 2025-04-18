@@ -11,22 +11,20 @@ sudo -u postgres psql -c "DO \$\$ BEGIN CREATE USER \"www-data\" WITH PASSWORD '
 sudo -u postgres psql -c "ALTER USER nominatim CREATEDB;"
 sudo -u postgres psql -c "GRANT nominatim TO \"www-data\";"
 
-# Create and configure nominatim database
+# Create empty database
 sudo -u postgres psql -c "DROP DATABASE IF EXISTS nominatim;"
 sudo -u postgres createdb -O nominatim nominatim
 
-# Initialize database schema
+# Install required extensions
 sudo -u postgres psql -d nominatim -c "CREATE EXTENSION IF NOT EXISTS postgis;"
 sudo -u postgres psql -d nominatim -c "CREATE EXTENSION IF NOT EXISTS hstore;"
+
+# Configure database settings
 sudo -u postgres psql -d nominatim -c "ALTER DATABASE nominatim SET postgis.enable_outdb_rasters TO True;"
 sudo -u postgres psql -d nominatim -c "ALTER DATABASE nominatim SET postgis.gdal_enabled_drivers TO 'ENABLE_ALL';"
 
-# Set permissions
+# Set basic permissions
 sudo -u postgres psql -d nominatim -c "GRANT ALL PRIVILEGES ON DATABASE nominatim TO nominatim;"
 sudo -u postgres psql -d nominatim -c "GRANT CONNECT ON DATABASE nominatim TO \"www-data\";"
-sudo -u postgres psql -d nominatim -c "GRANT USAGE ON SCHEMA public TO \"www-data\";"
-sudo -u postgres psql -d nominatim -c "ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT SELECT ON TABLES TO \"www-data\";"
 
-# Create project directory structure
-mkdir -p /app/nominatim-project/module
-chown -R nominatim:nominatim /app/nominatim-project
+# Let nominatim handle schema creation and permissions
