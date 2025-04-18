@@ -21,14 +21,12 @@ sudo -u postgres psql -d nominatim -c "CREATE EXTENSION IF NOT EXISTS hstore;"
 sudo -u postgres psql -d nominatim -c "ALTER DATABASE nominatim SET postgis.enable_outdb_rasters TO True;"
 sudo -u postgres psql -d nominatim -c "ALTER DATABASE nominatim SET postgis.gdal_enabled_drivers TO 'ENABLE_ALL';"
 
-# Create nominatim tables
-sudo -u nominatim psql -d nominatim -c "CREATE SCHEMA IF NOT EXISTS nominatim;"
-sudo -u nominatim psql -d nominatim -c "ALTER DATABASE nominatim SET search_path TO nominatim,public;"
+# Initialize Nominatim database structure
+echo "Initializing Nominatim database structure..."
+su - nominatim -c "source ~/.bashrc && nominatim create-functions --project-dir /app/nominatim-project"
 
 # Set permissions
 sudo -u postgres psql -d nominatim -c "GRANT ALL PRIVILEGES ON DATABASE nominatim TO nominatim;"
 sudo -u postgres psql -d nominatim -c "GRANT CONNECT ON DATABASE nominatim TO \"www-data\";"
-sudo -u postgres psql -d nominatim -c "GRANT USAGE ON SCHEMA nominatim TO \"www-data\";"
 sudo -u postgres psql -d nominatim -c "GRANT USAGE ON SCHEMA public TO \"www-data\";"
-sudo -u postgres psql -d nominatim -c "ALTER DEFAULT PRIVILEGES IN SCHEMA nominatim GRANT SELECT ON TABLES TO \"www-data\";"
 sudo -u postgres psql -d nominatim -c "ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT SELECT ON TABLES TO \"www-data\";"
