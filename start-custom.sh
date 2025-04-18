@@ -17,8 +17,15 @@ echo "Initializing database users and permissions..."
 
 # Initialize Nominatim if not already done
 if [ ! -f /var/lib/postgresql/12/main/import-finished ]; then
+    echo "Setting up permissions..."
+    # Ensure nominatim user owns required directories
+    chown -R nominatim:nominatim /nominatim
+    chown -R nominatim:nominatim /app
+    
     echo "Importing OSM data..."
-    sudo -u nominatim nominatim import --osm-file $PBF_PATH
+    # Run import as nominatim user with proper environment
+    su - nominatim -c "source ~/.bashrc && nominatim import --osm-file $PBF_PATH"
+    
     touch /var/lib/postgresql/12/main/import-finished
     echo "OSM data import completed"
 fi

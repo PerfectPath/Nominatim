@@ -6,7 +6,18 @@ ENV DEBIAN_FRONTEND=noninteractive
 # Instalar herramientas necesarias
 RUN apt-get update && \
     apt-get install -y wget postgresql-client sudo && \
-    rm -rf /var/lib/apt/lists/*
+    rm -rf /var/lib/apt/lists/* && \
+    # Crear usuario y grupo nominatim
+    addgroup --system nominatim && \
+    adduser --system --ingroup nominatim --home /home/nominatim --shell /bin/bash nominatim && \
+    # Agregar nominatim al grupo sudo
+    adduser nominatim sudo && \
+    # Permitir a nominatim usar sudo sin contraseña
+    echo "nominatim ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/nominatim && \
+    # Asegurar que nominatim tenga acceso a los comandos necesarios
+    echo 'export PATH="/usr/local/bin:$PATH"' >> /home/nominatim/.bashrc && \
+    # Dar propiedad de directorios importantes
+    chown -R nominatim:nominatim /home/nominatim
 
 # Crear script de inicialización de PostgreSQL
 COPY ./init-db.sh /docker-entrypoint-initdb.d/init-db.sh
