@@ -3,9 +3,9 @@ FROM mediagis/nominatim:4.0
 # Evitar interacciones durante la instalación de paquetes
 ENV DEBIAN_FRONTEND=noninteractive
 
-# Instalar wget y herramientas de PostgreSQL
+# Instalar herramientas necesarias
 RUN apt-get update && \
-    apt-get install -y wget postgresql-client && \
+    apt-get install -y wget postgresql-client sudo && \
     rm -rf /var/lib/apt/lists/*
 
 # Crear script de inicialización de PostgreSQL
@@ -21,15 +21,10 @@ RUN wget -q https://download.geofabrik.de/south-america/chile-latest.osm.pbf -O 
 # Descargar el archivo country_grid necesario para la funcionalidad de búsqueda
 RUN mkdir -p /app/data && wget -q https://nominatim.org/data/country_grid.sql.gz -O /app/data/country_osm_grid.sql.gz
 
-# Configurar variables de entorno para Nominatim y PostgreSQL
+# Configurar variables de entorno para Nominatim
 ENV PBF_PATH=/nominatim/data.osm.pbf
 ENV REPLICATION_URL=https://download.geofabrik.de/south-america/chile-updates/
-ENV NOMINATIM_PASSWORD=nominatim
-ENV NOMINATIM_DATABASE=nominatim
-ENV POSTGRES_USER=postgres
-ENV POSTGRES_DB=postgres
-ENV POSTGRES_PASSWORD=nominatim
-ENV NOMINATIM_DATABASE_DSN="pgsql:host=localhost;dbname=${NOMINATIM_DATABASE};user=www-data;password=${NOMINATIM_PASSWORD}"
+ENV NOMINATIM_DATABASE_DSN="pgsql:host=localhost;dbname=nominatim;user=www-data;password=nominatim"
 
 # Crear script para esperar a PostgreSQL
 RUN echo '#!/bin/bash' > /app/wait-for-postgres.sh && \
