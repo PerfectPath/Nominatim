@@ -9,19 +9,8 @@ RUN apt-get update && \
     rm -rf /var/lib/apt/lists/*
 
 # Crear script de inicialización de PostgreSQL
-RUN mkdir -p /docker-entrypoint-initdb.d && \
-    echo '#!/bin/bash' > /docker-entrypoint-initdb.d/setup-users.sh && \
-    echo 'psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" --dbname "$POSTGRES_DB" <<-EOSQL' >> /docker-entrypoint-initdb.d/setup-users.sh && \
-    echo "  DO \$\$" >> /docker-entrypoint-initdb.d/setup-users.sh && \
-    echo "  BEGIN" >> /docker-entrypoint-initdb.d/setup-users.sh && \
-    echo "    CREATE USER www-data WITH PASSWORD 'nominatim';" >> /docker-entrypoint-initdb.d/setup-users.sh && \
-    echo "    EXCEPTION WHEN DUPLICATE_OBJECT THEN" >> /docker-entrypoint-initdb.d/setup-users.sh && \
-    echo "    RAISE NOTICE 'User already exists';" >> /docker-entrypoint-initdb.d/setup-users.sh && \
-    echo "  END" >> /docker-entrypoint-initdb.d/setup-users.sh && \
-    echo "  \$\$;" >> /docker-entrypoint-initdb.d/setup-users.sh && \
-    echo "  GRANT nominatim TO www-data;" >> /docker-entrypoint-initdb.d/setup-users.sh && \
-    echo "EOSQL" >> /docker-entrypoint-initdb.d/setup-users.sh && \
-    chmod +x /docker-entrypoint-initdb.d/setup-users.sh
+COPY ./init-db.sh /docker-entrypoint-initdb.d/init-db.sh
+RUN chmod +x /docker-entrypoint-initdb.d/init-db.sh
 
 # Configurar directorios
 WORKDIR /app
@@ -37,22 +26,20 @@ ENV PBF_PATH=/nominatim/data.osm.pbf
 ENV REPLICATION_URL=https://download.geofabrik.de/south-america/chile-updates/
 ENV NOMINATIM_PASSWORD=nominatim
 ENV NOMINATIM_DATABASE=nominatim
-ENV POSTGRES_USER=nominatim
-ENV POSTGRES_DB=nominatim
+ENV POSTGRES_USER=postgres
+ENV POSTGRES_DB=postgres
 ENV POSTGRES_PASSWORD=nominatim
 ENV NOMINATIM_DATABASE_DSN="pgsql:host=localhost;dbname=${NOMINATIM_DATABASE};user=www-data;password=${NOMINATIM_PASSWORD}"
 
-# Crear script para ejecutar después de la inicialización de PostgreSQL
-RUN mkdir -p /docker-entrypoint-initdb.d/post-init && \
-    mv /docker-entrypoint-initdb.d/setup-users.sh /docker-entrypoint-initdb.d/post-init/ && \
-    echo '#!/bin/bash' > /docker-entrypoint-initdb.d/wait-and-setup.sh && \
-    echo 'until pg_isready -h localhost; do' >> /docker-entrypoint-initdb.d/wait-and-setup.sh && \
-    echo '  echo "Waiting for PostgreSQL to start..."' >> /docker-entrypoint-initdb.d/wait-and-setup.sh && \
-    echo '  sleep 2' >> /docker-entrypoint-initdb.d/wait-and-setup.sh && \
-    echo 'done' >> /docker-entrypoint-initdb.d/wait-and-setup.sh && \
-    echo 'echo "PostgreSQL is ready, running user setup..."' >> /docker-entrypoint-initdb.d/wait-and-setup.sh && \
-    echo '/docker-entrypoint-initdb.d/post-init/setup-users.sh' >> /docker-entrypoint-initdb.d/wait-and-setup.sh && \
-    chmod +x /docker-entrypoint-initdb.d/wait-and-setup.sh
+# Crear script para esperar a PostgreSQL
+RUN echo '#!/bin/bash' > /app/wait-for-postgres.sh && \
+    echo 'until pg_isready -h localhost; do' >> /app/wait-for-postgres.sh && \
+    echo '  echo "Waiting for PostgreSQL to start..."' >> /app/wait-for-postgres.sh && \
+    echo '  sleep 2' >> /app/wait-for-postgres.sh && \
+    echo 'done' >> /app/wait-for-postgres.sh && \
+    echo 'echo "PostgreSQL is ready, running database initialization..."' >> /app/wait-for-postgres.sh && \
+    echo '/docker-entrypoint-initdb.d/init-db.sh' >> /app/wait-for-postgres.sh && \
+    chmod +x /app/wait-for-postgres.sh
 
 # Copiar archivos de configuración si existen
 COPY ./settings/local.php /app/nominatim-project/settings/local.php
@@ -62,5 +49,9 @@ COPY ./pg_hba_custom.conf /nominatim/pg_hba_custom.conf
 # Exponer puerto
 EXPOSE 8080
 
-# Usar el script de entrada predeterminado de la imagen base
-ENTRYPOINT ["/app/start.sh"]
+# Copiar y configurar script de inicio personalizado
+COPY ./start-custom.sh /app/start-custom.sh
+RUN chmod +x /app/start-custom.sh
+
+# Usar nuestro script de inicio personalizado
+ENTRYPOINT ["/app/start-custom.sh"]
