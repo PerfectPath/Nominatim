@@ -3,8 +3,14 @@ FROM mediagis/nominatim:4.0
 # Evitar interacciones durante la instalación de paquetes
 ENV DEBIAN_FRONTEND=noninteractive
 
-# Instalar wget
-RUN apt-get update && apt-get install -y wget && rm -rf /var/lib/apt/lists/*
+# Instalar wget y herramientas de PostgreSQL
+RUN apt-get update && \
+    apt-get install -y wget postgresql-client && \
+    rm -rf /var/lib/apt/lists/*
+
+# Crear archivo con comandos SQL para configurar usuarios
+RUN echo "CREATE USER www-data WITH PASSWORD 'nominatim';" > /docker-entrypoint-initdb.d/setup-users.sql && \
+    echo "GRANT nominatim TO www-data;" >> /docker-entrypoint-initdb.d/setup-users.sql
 
 # Configurar directorios
 WORKDIR /app
@@ -20,7 +26,8 @@ ENV PBF_PATH=/nominatim/data.osm.pbf
 ENV REPLICATION_URL=https://download.geofabrik.de/south-america/chile-updates/
 ENV NOMINATIM_PASSWORD=nominatim
 ENV NOMINATIM_DATABASE=nominatim
-ENV NOMINATIM_DATABASE_DSN="pgsql:dbname=${NOMINATIM_DATABASE};user=nominatim;password=${NOMINATIM_PASSWORD}"
+ENV NOMINATIM_DATABASE_DSN="pgsql:host=localhost;dbname=${NOMINATIM_DATABASE};user=nominatim;password=${NOMINATIM_PASSWORD}"
+ENV POSTGRES_PASSWORD=nominatim
 
 # Copiar archivos de configuración si existen
 COPY ./settings/local.php /app/nominatim-project/settings/local.php

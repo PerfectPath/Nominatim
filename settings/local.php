@@ -12,11 +12,14 @@ if (getenv('DATABASE_URL') !== false) {
     $db_user = $db_url['user'] ?? 'nominatim';
     $db_pass = $db_url['pass'] ?? 'nominatim';
     
-    @define('CONST_Database_DSN', "pgsql:host=$db_host;port=$db_port;dbname=$db_name;user=$db_user;password=$db_pass");
+    @define('CONST_Database_DSN', "pgsql:host=$db_host;port=$db_port;dbname=$db_name;user=www-data;password=$db_pass");
 } else {
     // Local development settings
-    @define('CONST_Database_DSN', 'pgsql:host=nominatim-db;port=5432;dbname=nominatim;user=nominatim;password=nominatim');
+    @define('CONST_Database_DSN', 'pgsql:host=localhost;port=5432;dbname=nominatim;user=www-data;password=nominatim');
 }
+
+// Ensure proper permissions for www-data
+@define('CONST_Database_Web_User', 'www-data');
 
 // Website settings
 @define('CONST_Website_BaseURL', '/');
