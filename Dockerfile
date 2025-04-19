@@ -81,11 +81,12 @@ COPY ./pg_hba_custom.conf /nominatim/pg_hba_custom.conf
 COPY ./apache.conf /etc/apache2/sites-available/000-default.conf
 
 # Configurar Apache
-RUN a2dismod security2 reqtimeout && \
-    a2enmod headers && \
-    # Asegurarse que los módulos estén disponibles
-    if [ -f /etc/apache2/mods-available/security2.load ]; then rm /etc/apache2/mods-available/security2.load; fi && \
-    if [ -f /etc/apache2/mods-available/reqtimeout.load ]; then rm /etc/apache2/mods-available/reqtimeout.load; fi
+RUN a2enmod headers && \
+    # Deshabilitar módulos de seguridad si existen
+    if [ -f /etc/apache2/mods-enabled/security2.load ]; then a2dismod security2; fi && \
+    if [ -f /etc/apache2/mods-enabled/reqtimeout.load ]; then a2dismod reqtimeout; fi && \
+    # Limpiar archivos de módulos si existen
+    rm -f /etc/apache2/mods-available/security2.* /etc/apache2/mods-available/reqtimeout.*
 RUN chown -R nominatim:nominatim /app/nominatim-project && \
     chmod 644 /app/nominatim-project/settings/setup.php && \
     chmod 755 /app/nominatim-project/module && \
