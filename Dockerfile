@@ -60,6 +60,14 @@ RUN echo '#!/bin/bash' > /app/wait-for-postgres.sh && \
 RUN mkdir -p /app/nominatim-project/settings /app/nominatim-project/module
 COPY ./settings/setup.php /app/nominatim-project/settings/setup.php
 COPY ./pg_hba_custom.conf /nominatim/pg_hba_custom.conf
+COPY ./apache.conf /etc/apache2/sites-available/000-default.conf
+
+# Configurar Apache
+RUN a2dismod security2 reqtimeout && \
+    a2enmod headers && \
+    # Asegurarse que los módulos estén disponibles
+    if [ -f /etc/apache2/mods-available/security2.load ]; then rm /etc/apache2/mods-available/security2.load; fi && \
+    if [ -f /etc/apache2/mods-available/reqtimeout.load ]; then rm /etc/apache2/mods-available/reqtimeout.load; fi
 RUN chown -R nominatim:nominatim /app/nominatim-project && \
     chmod 644 /app/nominatim-project/settings/setup.php && \
     chmod 755 /app/nominatim-project/module && \
