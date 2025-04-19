@@ -47,8 +47,6 @@ RUN service postgresql stop && \
     rm -rf /var/lib/postgresql/12/main && \
     ln -s /osm/cl/postgresql /var/lib/postgresql/12/main
 
-VOLUME ["/osm/cl"]
-
 # Variable para control de inicialización
 ENV FORCE_DB_INIT=false
 
