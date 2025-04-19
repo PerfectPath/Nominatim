@@ -15,8 +15,15 @@ echo "PostgreSQL is ready"
 echo "Initializing database users and permissions..."
 /docker-entrypoint-initdb.d/init-db.sh
 
-# Initialize Nominatim if not already done
-if [ ! -f /var/lib/postgresql/12/main/import-finished ]; then
+# Function to check if database is initialized
+check_db_initialized() {
+    su - postgres -c "psql -lqt" | cut -d \| -f 1 | grep -qw nominatim
+    return $?
+}
+
+# Initialize Nominatim if needed
+if [ "$FORCE_DB_INIT" = "true" ] || ! check_db_initialized; then
+    echo "Database initialization required (FORCE_DB_INIT=$FORCE_DB_INIT)"
     echo "Setting up permissions..."
     # Ensure nominatim user owns required directories
     chown -R nominatim:nominatim /nominatim
@@ -29,8 +36,11 @@ if [ ! -f /var/lib/postgresql/12/main/import-finished ]; then
         nominatim index --project-dir /app/nominatim-project && \
         nominatim refresh --project-dir /app/nominatim-project"
     
-    touch /var/lib/postgresql/12/main/import-finished
+    # Mark initialization as complete
+    touch /var/lib/postgresql/data/import-finished
     echo "OSM data import completed"
+else
+    echo "Database already initialized, skipping import"
 fi
 
 # Remove stale pid if it exists

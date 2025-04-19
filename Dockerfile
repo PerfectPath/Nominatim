@@ -30,10 +30,17 @@ RUN apt-get update && \
 COPY ./init-db.sh /docker-entrypoint-initdb.d/init-db.sh
 RUN chmod +x /docker-entrypoint-initdb.d/init-db.sh
 
-# Configurar directorios
+# Configurar directorios y volumen para PostgreSQL
 WORKDIR /app
 RUN mkdir -p /app/nominatim-project && \
-    chown -R nominatim:nominatim /app/nominatim-project
+    chown -R nominatim:nominatim /app/nominatim-project && \
+    mkdir -p /var/lib/postgresql/data && \
+    chown -R postgres:postgres /var/lib/postgresql/data
+
+VOLUME ["/var/lib/postgresql/data"]
+
+# Variable para control de inicialización
+ENV FORCE_DB_INIT=false
 
 # Descargar archivo OSM de Chile directamente a la ubicación esperada por el script de inicio
 RUN wget -q https://download.geofabrik.de/south-america/chile-latest.osm.pbf -O /nominatim/data.osm.pbf

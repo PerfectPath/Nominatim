@@ -12,7 +12,21 @@
   },
   "services": {
     "web": {
-      "port": 8080
+      "port": 8080,
+      "volumes": [
+        {
+          "name": "nominatim-data",
+          "mountPath": "/var/lib/postgresql/data",
+          "persistent": true
+        }
+      ],
+      "envs": [
+        {
+          "key": "FORCE_DB_INIT",
+          "value": "false",
+          "description": "Set to true to force database reinitialization"
+        }
+      ]
     }
   }
 }
