@@ -6,9 +6,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.3.0] - 2025-04-18
 ### Added
-- Persistent volume support for PostgreSQL data
-- FORCE_DB_INIT environment variable to control database initialization
-- Database initialization check to skip import when data exists
+- PostgreSQL data persistence in Railway volume at /osm/cl/postgresql
+- Proper PostgreSQL data directory initialization and management
+- PG_VERSION check for reliable database state detection
+- Improved permissions handling for PostgreSQL data
+
+### Changed
+- Moved PostgreSQL data directory to persistent volume
+- Enhanced startup script with better PostgreSQL handling
+- Disabled automatic updates during import for faster initialization
+- Restructured volume layout for better organization
 
 ## [0.2.0] - 2025-04-18
 ### Changed

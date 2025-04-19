@@ -30,20 +30,33 @@ RUN apt-get update && \
 COPY ./init-db.sh /docker-entrypoint-initdb.d/init-db.sh
 RUN chmod +x /docker-entrypoint-initdb.d/init-db.sh
 
-# Configurar directorios y volumen para PostgreSQL
+# Configurar directorios y volumen para PostgreSQL y datos OSM
 WORKDIR /app
 RUN mkdir -p /app/nominatim-project && \
+    mkdir -p /osm/cl/postgresql && \
+    mkdir -p /osm/cl/data && \
     chown -R nominatim:nominatim /app/nominatim-project && \
-    mkdir -p /var/lib/postgresql/data && \
-    chown -R postgres:postgres /var/lib/postgresql/data
+    chown -R postgres:postgres /osm/cl/postgresql && \
+    chown -R nominatim:nominatim /osm/cl/data
 
-VOLUME ["/var/lib/postgresql/data"]
+# Mover y configurar directorio de datos de PostgreSQL
+RUN service postgresql stop && \
+    if [ -d "/var/lib/postgresql/12/main" ]; then \
+        mv /var/lib/postgresql/12/main/* /osm/cl/postgresql/ 2>/dev/null || true; \
+    fi && \
+    rm -rf /var/lib/postgresql/12/main && \
+    ln -s /osm/cl/postgresql /var/lib/postgresql/12/main
+
+VOLUME ["/osm/cl"]
 
 # Variable para control de inicialización
 ENV FORCE_DB_INIT=false
 
-# Descargar archivo OSM de Chile directamente a la ubicación esperada por el script de inicio
-RUN wget -q https://download.geofabrik.de/south-america/chile-latest.osm.pbf -O /nominatim/data.osm.pbf
+# Configurar la ubicación del archivo OSM
+ENV OSM_DATA_PATH=/osm/cl/data/chile-latest.osm.pbf
+
+# Descargar archivo OSM
+RUN wget -q https://download.geofabrik.de/south-america/chile-latest.osm.pbf -O $OSM_DATA_PATH
 
 # Descargar el archivo country_grid necesario para la funcionalidad de búsqueda
 RUN mkdir -p /app/data && wget -q https://nominatim.org/data/country_grid.sql.gz -O /app/data/country_osm_grid.sql.gz

@@ -15,15 +15,22 @@ echo "PostgreSQL is ready"
 echo "Initializing database users and permissions..."
 /docker-entrypoint-initdb.d/init-db.sh
 
-# Function to check if database is initialized
-check_db_initialized() {
-    su - postgres -c "psql -lqt" | cut -d \| -f 1 | grep -qw nominatim
-    return $?
+# Function to check if PostgreSQL data exists
+check_postgres_data() {
+    [ -f "/osm/cl/postgresql/PG_VERSION" ]
 }
 
-# Initialize Nominatim if needed
-if [ "$FORCE_DB_INIT" = "true" ] || ! check_db_initialized; then
-    echo "Database initialization required (FORCE_DB_INIT=$FORCE_DB_INIT)"
+# Initialize or reuse PostgreSQL data
+if [ ! -f "/osm/cl/postgresql/PG_VERSION" ] || [ "$FORCE_DB_INIT" = "true" ]; then
+    echo "PostgreSQL data directory needs initialization (FORCE_DB_INIT=$FORCE_DB_INIT)"
+    
+    if [ "$FORCE_DB_INIT" = "true" ]; then
+        echo "Forcing reinitialization of PostgreSQL data..."
+        rm -rf /osm/cl/postgresql/*
+    fi
+
+    # Initialize PostgreSQL data directory
+    su - postgres -c "initdb -D /osm/cl/postgresql"
     echo "Setting up permissions..."
     # Ensure nominatim user owns required directories
     chown -R nominatim:nominatim /nominatim
@@ -32,16 +39,20 @@ if [ "$FORCE_DB_INIT" = "true" ] || ! check_db_initialized; then
     echo "Importing OSM data..."
     # Import the data directly (nominatim will create the schema)
     su - nominatim -c "source ~/.bashrc && \
-        nominatim import --osm-file $PBF_PATH --project-dir /app/nominatim-project && \
+        nominatim import --osm-file $OSM_DATA_PATH --project-dir /app/nominatim-project --no-download-updates && \
         nominatim index --project-dir /app/nominatim-project && \
         nominatim refresh --project-dir /app/nominatim-project"
     
     # Mark initialization as complete
-    touch /var/lib/postgresql/data/import-finished
-    echo "OSM data import completed"
+    touch /osm/cl/postgresql/nominatim-import-finished
+    echo "PostgreSQL data and OSM import completed"
 else
-    echo "Database already initialized, skipping import"
+    echo "Using existing PostgreSQL data directory"
 fi
+
+# Ensure correct permissions
+chown -R postgres:postgres /osm/cl/postgresql
+chmod 700 /osm/cl/postgresql
 
 # Remove stale pid if it exists
 if [ -f /var/run/apache2/apache2.pid ]; then

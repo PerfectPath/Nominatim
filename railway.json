@@ -13,18 +13,16 @@
   "services": {
     "web": {
       "port": 8080,
-      "volumes": [
-        {
-          "name": "nominatim-data",
-          "mountPath": "/var/lib/postgresql/data",
-          "persistent": true
-        }
-      ],
       "envs": [
         {
           "key": "FORCE_DB_INIT",
           "value": "false",
           "description": "Set to true to force database reinitialization"
+        },
+        {
+          "key": "OSM_DATA_PATH",
+          "value": "/osm/cl/chile-latest.osm.pbf",
+          "description": "Path to OSM data file in persistent volume"
         }
       ]
     }
