@@ -43,15 +43,15 @@ if [ ! -f "/var/lib/postgresql/12/main/PG_VERSION" ] || [ "$FORCE_DB_INIT" = "tr
         nominatim refresh --project-dir /app/nominatim-project"
     
     # Mark initialization as complete
-    touch /osm/cl/postgresql/nominatim-import-finished
+    touch /var/lib/postgresql/12/main/nominatim-import-finished
     echo "PostgreSQL data and OSM import completed"
 else
     echo "Using existing PostgreSQL data directory"
 fi
 
 # Ensure correct permissions
-chown -R postgres:postgres /osm/cl/postgresql
-chmod 700 /osm/cl/postgresql
+chown -R postgres:postgres /var/lib/postgresql/12/main
+chmod 700 /var/lib/postgresql/12/main
 
 # Remove stale pid if it exists
 if [ -f /var/run/apache2/apache2.pid ]; then
