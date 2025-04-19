@@ -21,8 +21,14 @@
         },
         {
           "key": "OSM_DATA_PATH",
-          "value": "/osm/cl/chile-latest.osm.pbf",
+          "value": "/osm/cl/data/chile-latest.osm.pbf",
           "description": "Path to OSM data file in persistent volume"
+        }
+      ],
+      "volumes": [
+        {
+          "mountPath": "/var/lib/postgresql/12/main",
+          "description": "PostgreSQL data directory"
         }
       ]
     }

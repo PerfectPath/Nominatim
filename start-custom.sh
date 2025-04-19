@@ -15,22 +15,21 @@ echo "PostgreSQL is ready"
 echo "Initializing database users and permissions..."
 /docker-entrypoint-initdb.d/init-db.sh
 
-# Function to check if PostgreSQL data exists
-check_postgres_data() {
-    [ -f "/osm/cl/postgresql/PG_VERSION" ]
-}
+# Ensure PostgreSQL directories exist with correct permissions
+mkdir -p /var/lib/postgresql/12/main
+chown -R postgres:postgres /var/lib/postgresql
 
-# Initialize or reuse PostgreSQL data
-if [ ! -f "/osm/cl/postgresql/PG_VERSION" ] || [ "$FORCE_DB_INIT" = "true" ]; then
+# Initialize PostgreSQL if needed
+if [ ! -f "/var/lib/postgresql/12/main/PG_VERSION" ] || [ "$FORCE_DB_INIT" = "true" ]; then
     echo "PostgreSQL data directory needs initialization (FORCE_DB_INIT=$FORCE_DB_INIT)"
     
     if [ "$FORCE_DB_INIT" = "true" ]; then
         echo "Forcing reinitialization of PostgreSQL data..."
-        rm -rf /osm/cl/postgresql/*
+        rm -rf /var/lib/postgresql/12/main/*
     fi
 
     # Initialize PostgreSQL data directory
-    su - postgres -c "initdb -D /osm/cl/postgresql"
+    su - postgres -c "initdb -D /var/lib/postgresql/12/main"
     echo "Setting up permissions..."
     # Ensure nominatim user owns required directories
     chown -R nominatim:nominatim /nominatim
